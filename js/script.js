@@ -3,6 +3,8 @@ const clientid = '&client_id=4HLUBBPKV5WMSV24VMTVWA44LVSV1TQENTFUNETMJRVZAPVH'
 const clientSecret = '&client_secret=T0S3T3XZ5JKIJYI31QDPLPF5JVEWCGHWVNRLA1GUFN5ZVK0D'
 const apiKey = version +clientid+ clientSecret;
 
+let googlebtn = document.querySelector('.google');
+
 
 (function(){
 
@@ -24,6 +26,32 @@ const apiKey = version +clientid+ clientSecret;
   var firebaseRef = firebase.database().ref().push();
 
   var geoFire = new GeoFire(firebaseRef);
+
+  var provider = new firebase.auth.GoogleAuthProvider();
+
+
+  function google(){
+    firebase.auth().signInWithPopup(provider).then(function(result) {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      // var user = result.user;
+
+      var user = firebase.auth().currentUser;
+
+      console.log(user.providerData.providerId);
+
+      changePage();
+
+    }).catch(function(error) {
+        console.log('error' + error);
+  });
+  }
+
+
+  googlebtn.addEventListener('click', google);
+
+
 
 
   displayMap();
@@ -74,15 +102,15 @@ const apiKey = version +clientid+ clientSecret;
 
     var getLocation = function() {
       if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-      console.log("getting location");
-      navigator.geolocation.getCurrentPosition( geolocationCallback);
-      map.locate({setView: true, maxZoom: 16});
-    } else {
+        console.log("getting location");
+        navigator.geolocation.getCurrentPosition( geolocationCallback);
+        map.locate({setView: true, maxZoom: 16});
+      } else {
         console.log("rats.")
-    }
-  };
+      }
+    };
 
-  var geolocationCallback = function(location) {
+    var geolocationCallback = function(location) {
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
     console.log("you are here i think: [" + latitude + ", " + longitude + "]");
@@ -98,9 +126,9 @@ const apiKey = version +clientid+ clientSecret;
     });
   };
 
-  map.on('locationfound', onLocationFound);
+    map.on('locationfound', onLocationFound);
 
-  function onLocationFound(e) {
+    function onLocationFound(e) {
     var radius = e.accuracy * 5;
 
     L.marker((e.latlng),{icon:savedIcon}).addTo(map)
@@ -141,12 +169,12 @@ const apiKey = version +clientid+ clientSecret;
 
     								});
     					}
-  }
+    }
 
 })();
 
-var nearbyLocation = document.querySelector('#nearby');
-nearbyLocation.addEventListener('click', changePage);
+
+
 
 var searchIcon = document.querySelector('.header__searchIcon');
 var searchBar = document.querySelector('.header__searchBar');
