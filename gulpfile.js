@@ -23,7 +23,7 @@ gulp.task('js', function () {
 
 gulp.task('js-watch', ['js'], function (done) {
     reload;
-    done();
+    done();//hi
 });
 
 gulp.task('serve', function(){
