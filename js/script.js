@@ -99,69 +99,109 @@ const apiKey = version +clientid+ clientSecret;
     });
   };
 
+  var markerIcon = L.icon({
+         iconUrl: '../img/pin.svg',
+         iconSize:     [60, 95],
+         iconAnchor:   [30, 40], // point of the icon which will correspond to marker's location
+    })
+
   map.on('locationfound', onLocationFound);
 
   function onLocationFound(e) {
     var radius = e.accuracy * 5;
 
-    L.marker((e.latlng),{icon:savedIcon}).addTo(map)
+    L.marker((e.latlng),{icon:markerIcon}).addTo(map)
         .bindPopup( username + "'s position").openPopup();
 
-    L.circle(e.latlng, radius).addTo(map);
+
 
     let lat = e.latlng.lat
     let lng = e.latlng.lng
 
-        doMapThings(lat, lng);
-  }
-    // Get the current user's location
-    getLocation();
+    doMapThings(lat, lng);
+}
+
+  getLocation();
+
+function doMapThings(lat,lng) {
+      var corner1 = L.latLng(-36.815135, 174.716778),
+          corner2 = L.latLng(-36.912724, 174.816856);
+
+          var bounds = L.latLngBounds(corner1, corner2);
+
+          var center = [lat, lng];
+
+          map.setView(center, 14);
+
+          L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibmFpdnZpIiwiYSI6ImNqNmxncmoyMjFyZGMyeG1xN3Yyejk4dHIifQ.O7Bby6q1Jbn8v9ANa4_P5w', {foo: 'bar'}).addTo(map);
+          L.circle(center, {radius: 2500, fill: false, color: '#000'}).addTo(map);
+
+          map.setMaxBounds(bounds);
+
+          let userLocation = [lat, lng];
+
+            var foodRequest = {
+               location: { lat: parseFloat(lat),
+                        lng: parseFloat(lng),
+                      },
+               radius: '500',
+               type: ['restaurant']
+             };
+            var hotelRequest = {
+                location: { lat: parseFloat(lat),
+                         lng: parseFloat(lng),
+                       },
+                radius: '500',
+                type: ['hotel']
+            };
 
 
-    function doMapThings(lat,lng) {
-              var corner1 = L.latLng(-36.815135, 174.716778),
-                  corner2 = L.latLng(-36.912724, 174.816856),
-                  bounds = L.latLngBounds(corner1, corner2);
+          let serviceHolder = document.querySelector('.serviceHolder');
 
-                // map.setMaxBounds(bounds);
+          let foodlocales = [];
+          let hotellocales = [];
+          let testresults;
 
-
-    							var fetchFood= fetch('https://api.foursquare.com/v2/venues/search' + apiKey+'&ll='+ lat + ',' + lng + '&query=Restaurant&limit=5')
-    									.then(function(response){
-    									return response.json();
-    								});
-
-                    var fetchHotels = fetch('https://api.foursquare.com/v2/venues/search' + apiKey+'&ll='+ lat + ',' + lng + '&query=Hotel&limit=5')
-                        .then(function(response){
-                        return response.json();
-                      });
-
-                      Promise.all([fetchFood, fetchHotels]).then(values => {
-                      let  foodvenues = values[0].response.venues;
-                  		let hotelvenues = values[1].response.venues;
-
-                      console.log(hotelvenues);
-    										var center = [lat, lng];
-
-    										map.setView(center, 14);
-
-    										L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibmFpdnZpIiwiYSI6ImNqNmxncmoyMjFyZGMyeG1xN3Yyejk4dHIifQ.O7Bby6q1Jbn8v9ANa4_P5w', {foo: 'bar'}).addTo(map);
-    										L.circle(center, {radius: 2500, fill: false, color: '#000'}).addTo(map);
-
-                        for (let i = 0; i < foodvenues.length; i++) {
-                    	      let venuelocation = [foodvenues[i].location.lat, foodvenues[i].location.lng];
+            service = new google.maps.places.PlacesService(serviceHolder);
+              let test = new Promise((resolve, reject) => {
+                  service.nearbySearch(foodRequest, function(results, status) {
+                    for (let i = 0; i < results.length; i++) {
+                         let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
+                         if (results[i].types.includes('restaurant')) {
                           let marker = L.marker(venuelocation, {icon:foodIcon}).addTo(map);
-                        }
-
-                      for (let i = 0; i <  hotelvenues.length; i++) {
-                  	      let venuelocation = [ hotelvenues[i].location.lat, hotelvenues[i].location.lng];
-                        let marker = L.marker(venuelocation, {icon:motelIcon}).addTo(map);
+                          foodlocales.push(results[i]);
+                          }
                       }
 
-    								});
-    					}
-  }
+                  resolve(foodlocales);
+                  });
 
+        }).then(function(response) {
+            console.log(response);
+        })
+
+            // service.nearbySearch(hotelRequest, callback);
+            //
+            //
+            // function callback(results, status) {
+            //
+            //   for (let i = 0; i < results.length; i++) {
+            //        let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
+            //
+            //        if (results[i].types.includes('restaurant')) {
+            //         let marker = L.marker(venuelocation, {icon:foodIcon}).addTo(map);
+            //         foodlocales.push(results[i]);
+            //
+            //         }
+            //
+            //       else if (results[i].types.includes('lodging')) {
+            //        let marker = L.marker(venuelocation, {icon:motelIcon}).addTo(map);
+            //             hotellocales.push(results[i]);
+            //        }
+            // }
+
+    }
+}
 })();
 
 var nearbyLocation = document.querySelector('#nearby');
