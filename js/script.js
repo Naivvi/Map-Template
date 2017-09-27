@@ -23,7 +23,7 @@ let googlebtn = document.querySelector('.google');
   };
   firebase.initializeApp(config);
 
-  var firebaseRef = firebase.database().ref().push();
+  var firebaseRef = firebase.database().ref();
 
   var geoFire = new GeoFire(firebaseRef);
 
@@ -39,13 +39,26 @@ let googlebtn = document.querySelector('.google');
 
       var user = firebase.auth().currentUser;
 
-      console.log(user.providerData.providerId);
+      // var ref = new Firebase("https://scenic-spots.firebaseio.com");
+      //
+      // firebaseRef.onAuth(function(authData) {
+      //   if (authData) {
+      //     // save the user's profile into the database so we can list users,
+      //     // use them in Security and Firebase Rules, and show profiles
+      //     firebaseRef.child("users").child(authData.uid).set({
+      //       provider: authData.provider,
+      //       name: getName(authData)
+      //     });
+      //   }
+      // });
 
       changePage();
 
-    }).catch(function(error) {
+      }).catch(function(error) {
         console.log('error' + error);
-  });
+      });
+
+
   }
 
 
@@ -126,24 +139,24 @@ let googlebtn = document.querySelector('.google');
     });
   };
 
-    map.on('locationfound', onLocationFound);
+  map.on('locationfound', onLocationFound);
 
-    function onLocationFound(e) {
+  function onLocationFound(e) {
     var radius = e.accuracy * 5;
 
     L.marker((e.latlng),{icon:savedIcon}).addTo(map)
         .bindPopup( username + "'s position").openPopup();
 
-    L.circle(e.latlng, radius).addTo(map);
+        L.circle(e.latlng, radius).addTo(map);
   }
 
-    doMapThings();
+  doMapThings();
 
-    // Get the current user's location
-    getLocation();
+  // Get the current user's location
+  getLocation();
 
 
-    function doMapThings(city) {
+  function doMapThings(city) {
               var corner1 = L.latLng(-36.815135, 174.716778),
                   corner2 = L.latLng(-36.912724, 174.816856),
                   bounds = L.latLngBounds(corner1, corner2);
@@ -171,7 +184,42 @@ let googlebtn = document.querySelector('.google');
     					}
     }
 
+
+  var popup = L.popup();
+
+  function onMapClick(e) {
+    console.log('d');
+      popup
+          .setLatLng(e.latlng)
+          .setContent("add scenic spot? " + e.latlng.toString())
+          .openOn(map);
+          // .addEventListener('click',function(){
+          //  alert('added scenic spot');
+          // });
+
+      let pos = [e.latlng.lat, e.latlng.lng];
+
+      console.log(pos);
+      console.log(e.latlng);
+      $('.leaflet-popup').on('click',function(){
+        firebaseRef.set(pos).then(function() {
+          console.log( "yoza");
+
+
+
+
+
+
+      });
+    });
+
+  }
+
+  map.on('click', onMapClick);
+
 })();
+
+
 
 
 
