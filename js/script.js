@@ -129,6 +129,9 @@ function doMapThings(lat,lng) {
 
           var bounds = L.latLngBounds(corner1, corner2);
 
+          lat = -36.86667;
+          lng =	174.76667;
+
           var center = [lat, lng];
 
           map.setView(center, 14);
@@ -163,9 +166,12 @@ function doMapThings(lat,lng) {
           let testresults;
 
             service = new google.maps.places.PlacesService(serviceHolder);
-              let test = new Promise((resolve, reject) => {
+
+              let foodsearch = new Promise((resolve, reject) => {
                   service.nearbySearch(foodRequest, function(results, status) {
                     for (let i = 0; i < results.length; i++) {
+
+                      // REMEMBER OT PUT  BACK:  let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
                          let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
                          if (results[i].types.includes('restaurant')) {
                           let marker = L.marker(venuelocation, {icon:foodIcon}).addTo(map);
@@ -176,9 +182,29 @@ function doMapThings(lat,lng) {
                   resolve(foodlocales);
                   });
 
-        }).then(function(response) {
-            console.log(response);
         })
+
+          let hotelsearch = new Promise((resolve, reject) => {
+              service.nearbySearch(hotelRequest, function(results, status) {
+                for (let i = 0; i < results.length; i++) {
+                     let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
+                     if (results[i].types.includes('restaurant')) {
+                      let marker = L.marker(venuelocation, {icon:motelIcon}).addTo(map);
+                      hotellocales.push(results[i]);
+                      }
+                  }
+
+              resolve(hotellocales);
+              });
+
+    })
+
+    Promise.all([foodsearch, hotelsearch]).then(values => {
+      let phototest = fetch('https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + values[0][0].reference + '&key=AIzaSyC66CjDF7sOKRNVPH9pOBnTcMxzWvbRko4')
+    })
+
+
+
 
             // service.nearbySearch(hotelRequest, callback);
             //
