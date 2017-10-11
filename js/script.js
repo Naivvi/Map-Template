@@ -5,6 +5,43 @@ const apiKey = version +clientid+ clientSecret;
 
 let googlebtn = document.querySelector('.google');
 
+var popup = L.popup();
+
+var map = L.map("map", {
+    zoomControl: false,
+    minZoom: 16,
+    attributionControl: false
+    //... other options
+});
+
+var foodIcon = L.divIcon({
+  className: 'mapIcon mapIcon--food',
+  iconSize: [50, 50],
+  iconAnchor: [25, 90],
+  html: '<div class="mapIcon__stalk mapIcon__stalk--food"></div><div class="mapIcon__image mapIcon__image--food"></div>'
+});
+
+var motelIcon = L.divIcon({
+  className: 'mapIcon mapIcon--motel',
+    iconSize: [50, 50],
+  iconAnchor: [25, 90],
+  html: '<div class="mapIcon__stalk mapIcon__stalk--motel"></div><div class="mapIcon__image mapIcon__image--motel"></div>'
+});
+
+var scenicIcon = L.divIcon({
+  className: 'mapIcon mapIcon--scenic',
+  iconSize: [50, 50],
+  iconAnchor: [25, 90],
+  html: '<div class="mapIcon__stalk mapIcon__stalk--scenic"></div><div class="mapIcon__image mapIcon__image--scenic"></div>'
+});
+
+var savedIcon = L.divIcon({
+  className: 'mapIcon mapIcon--saved',
+  iconSize: [50, 50],
+  iconAnchor: [25, 90],
+  html: '<div class="mapIcon__stalk mapIcon__stalk--saved"></div><div class="mapIcon__image mapIcon__image--saved"></div>'
+});
+
 
 (function(){
 
@@ -27,8 +64,26 @@ let googlebtn = document.querySelector('.google');
 
   var geoFire = new GeoFire(firebaseRef);
 
-  var provider = new firebase.auth.GoogleAuthProvider();
+  var spotsRef = firebaseRef.child("spots");
 
+  var usersRef = firebaseRef.child("users");
+
+  usersRef.set({
+    tamari:{
+      is_cool:"yes"
+    }
+  });
+
+  spotsRef.set({
+    tamari:{
+      is_here:"yes"
+    }
+  });
+
+  console.log(usersRef);
+  console.log(spotsRef);
+
+  var provider = new firebase.auth.GoogleAuthProvider();
 
   function google(){
     firebase.auth().signInWithPopup(provider).then(function(result) {
@@ -61,11 +116,7 @@ let googlebtn = document.querySelector('.google');
 
   }
 
-
-  googlebtn.addEventListener('click', google);
-
-
-
+  googlebtn.addEventListener('click', changePage);
 
   displayMap();
 
@@ -76,40 +127,21 @@ let googlebtn = document.querySelector('.google');
     const clientSecret = '&client_secret=T0S3T3XZ5JKIJYI31QDPLPF5JVEWCGHWVNRLA1GUFN5ZVK0D'
     const apiKey = version +clientid+ clientSecret;
     var doneCities = [];
-    var map = L.map("map", {
-        zoomControl: false,
-        minZoom: 16,
-        attributionControl: false
-        //... other options
-    });
 
-    var foodIcon = L.divIcon({
-      className: 'mapIcon mapIcon--food',
-      iconSize: [50, 50],
-      iconAnchor: [25, 90],
-      html: '<div class="mapIcon__stalk mapIcon__stalk--food"></div><div class="mapIcon__image mapIcon__image--food"></div>'
-    });
 
-    var motelIcon = L.divIcon({
-      className: 'mapIcon mapIcon--motel',
-        iconSize: [50, 50],
-      iconAnchor: [25, 90],
-      html: '<div class="mapIcon__stalk mapIcon__stalk--motel"></div><div class="mapIcon__image mapIcon__image--motel"></div>'
-    });
 
-    var scenicIcon = L.divIcon({
-      className: 'mapIcon mapIcon--scenic',
-      iconSize: [50, 50],
-      iconAnchor: [25, 90],
-      html: '<div class="mapIcon__stalk mapIcon__stalk--scenic"></div><div class="mapIcon__image mapIcon__image--scenic"></div>'
-    });
 
-    var savedIcon = L.divIcon({
-      className: 'mapIcon mapIcon--saved',
-      iconSize: [50, 50],
-      iconAnchor: [25, 90],
-      html: '<div class="mapIcon__stalk mapIcon__stalk--saved"></div><div class="mapIcon__image mapIcon__image--saved"></div>'
-    });
+
+    //change to google display pic
+
+    // var savedIcon = L.divIcon({
+    //   className: 'mapIcon mapIcon--saved',
+    //   iconSize: [50, 50],
+    //   iconAnchor: [25, 90],
+    //   html: '<div class="mapIcon__stalk mapIcon__stalk--saved"></div><div class="mapIcon__image mapIcon__image--saved"></div>'
+    // });
+
+
 
 
 
@@ -129,17 +161,19 @@ let googlebtn = document.querySelector('.google');
     console.log("you are here i think: [" + latitude + ", " + longitude + "]");
 
 
-    geoFire.set(username, [latitude, longitude]).then(function() {
-      console.log( username + " found");
+    // usersRef.set(username, [latitude, longitude]).then(function() {
+    //   console.log( username + " found");
+    //
+    //
+    //   usersRef.child(username).onDisconnect().remove();
 
 
-      firebaseRef.child(username).onDisconnect().remove();
-
-
-    });
+    // });
   };
 
   map.on('locationfound', onLocationFound);
+
+  map.on('click', onMapClick);
 
   function onLocationFound(e) {
     var radius = e.accuracy * 5;
@@ -185,37 +219,59 @@ let googlebtn = document.querySelector('.google');
     }
 
 
-  var popup = L.popup();
+
 
   function onMapClick(e) {
-    console.log('d');
+    // console.log('d');
       popup
           .setLatLng(e.latlng)
-          .setContent("add scenic spot? " + e.latlng.toString())
-          .openOn(map);
-          // .addEventListener('click',function(){
-          //  alert('added scenic spot');
-          // });
+          .setContent("add scenic spot? ")
+          .openOn(map)
+          .addEventListener('click',function(){
+           alert('added scenic spot');
+          });
+
+      var newMarker = new L.marker((e.latlng),{icon:savedIcon}).addTo(map);
+
+
+
 
       let pos = [e.latlng.lat, e.latlng.lng];
+
+      // console.log(savedIcon);
+      //
+      // L.marker((e.latlng),{icon:savedIcon}).addTo(map)
+      //     .bindPopup( username + "'s position").openPopup();
+
+          $('#myModal').modal();
+
+
+          $('#save-spot').click(function(){
+
+            var spotName = $('#spot-name').val();
+            console.log(spotName);
+              spotsRef.set({
+                uuid:{
+                  spotname: spotName,
+                  location: pos,
+                }
+
+              })
+          });
 
       console.log(pos);
       console.log(e.latlng);
       $('.leaflet-popup').on('click',function(){
         firebaseRef.set(pos).then(function() {
           console.log( "yoza");
-
-
-
-
-
-
       });
     });
 
   }
 
-  map.on('click', onMapClick);
+
+
+
 
 })();
 
