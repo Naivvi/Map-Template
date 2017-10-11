@@ -6204,3 +6204,22 @@ body {
 #map {
   width: 100%;
   height: 86.75vh; }
+
+.venueInfo {
+  width: 100%;
+  height: 10em;
+  position: absolute;
+  top: 3em;
+  z-index: 997;
+  display: flex;
+  border-radius: 0.5em;
+  background-color: #fff; }
+  .venueInfo__img {
+    border-top-left-radius: 0.25em;
+    border-bottom-left-radius: 0.25em;
+    flex: 0 0 50%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat; }
+  .venueInfo__header {
+    flex: 1 0 30%; }

@@ -200,31 +200,27 @@ function doMapThings(lat,lng) {
     })
 
     Promise.all([foodsearch, hotelsearch]).then(values => {
-      let phototest = fetch('https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=' + values[0][0].reference + '&key=AIzaSyC66CjDF7sOKRNVPH9pOBnTcMxzWvbRko4')
+      let allvenues = values[0].concat(values[1])
+      console.log(allvenues);
+      let venuephotos = [];
+
+      for (let i = 0; i < allvenues.length; i++) {
+
+        if (allvenues[i].photos) {
+        venuephotos.push(allvenues[i].photos[0].getUrl({'maxWidth': 500, 'maxHeight': 500}))
+        } else {
+          venuephotos.push(null)
+        }
+      }
+
+      let venueInfoBox = document.querySelector('.venueInfo');
+      let venueInfoImg = document.querySelector('.venueInfo__img');
+
+      venueInfoImg.style.backgroundImage = "url('" + venuephotos[1] + "')"
+
     })
 
 
-
-
-            // service.nearbySearch(hotelRequest, callback);
-            //
-            //
-            // function callback(results, status) {
-            //
-            //   for (let i = 0; i < results.length; i++) {
-            //        let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
-            //
-            //        if (results[i].types.includes('restaurant')) {
-            //         let marker = L.marker(venuelocation, {icon:foodIcon}).addTo(map);
-            //         foodlocales.push(results[i]);
-            //
-            //         }
-            //
-            //       else if (results[i].types.includes('lodging')) {
-            //        let marker = L.marker(venuelocation, {icon:motelIcon}).addTo(map);
-            //             hotellocales.push(results[i]);
-            //        }
-            // }
 
     }
 }
