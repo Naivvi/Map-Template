@@ -129,8 +129,6 @@ function doMapThings(lat,lng) {
 
           var bounds = L.latLngBounds(corner1, corner2);
 
-          lat = -36.86667;
-          lng =	174.76667;
 
           var center = [lat, lng];
 
@@ -150,12 +148,13 @@ function doMapThings(lat,lng) {
                radius: '500',
                type: ['restaurant']
              };
+
             var hotelRequest = {
                 location: { lat: parseFloat(lat),
                          lng: parseFloat(lng),
                        },
                 radius: '500',
-                type: ['hotel']
+                type: ['lodging']
             };
 
 
@@ -186,11 +185,13 @@ function doMapThings(lat,lng) {
 
         })
 
+          service = new google.maps.places.PlacesService(serviceHolder);
+
           let hotelsearch = new Promise((resolve, reject) => {
               service.nearbySearch(hotelRequest, function(results, status) {
                 for (let i = 0; i < results.length; i++) {
                      let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
-                     if (results[i].types.includes('restaurant')) {
+                     if (results[i].types.includes('lodging')) {
                         hotelMarkers.push(L.marker(venuelocation, {icon:motelIcon}).addTo(map));
                       hotellocales.push(results[i]);
                       }
@@ -205,9 +206,10 @@ function doMapThings(lat,lng) {
 
       let allvenues = values[0].concat(values[1])
       let allmarkers = foodMarkers.concat(hotelMarkers)
-      console.log(allvenues);
+
       let venuephotos = [];
       let venueslatlng = [];
+
 
       for (let i = 0; i < allvenues.length; i++) {
 
@@ -220,26 +222,39 @@ function doMapThings(lat,lng) {
         venueslatlng[i] = [allvenues[i].geometry.location.lat(), allvenues[i].geometry.location.lng()]
       }
 
-      console.log(venueslatlng);
+
       for (let i = 0; i < allmarkers.length; i++) {
         allmarkers[i].on('click', showInfo);
       }
 
       let venueInfoBox = document.querySelector('.venueInfo');
-      let venueInfoImg = document.querySelector('.venueInfo__img');
+      let venueInfoNumber = document.querySelector('.venueInfo__number');
+      // let venueInfoImg = document.querySelector('.venueInfo__img');
 
-      venueInfoImg.style.backgroundImage = "url('" + venuephotos[1] + "')"
-
+      // venueInfoImg.style.backgroundImage = "url('" + venuephotos[1] + "')"
+      console.log(venuephotos)
       function showInfo(){
-        console.log(venueslatlng);
-        console.log(this);
+
         let lat = this._latlng.lat;
         let lng = this._latlng.lng;
         let location = [lat, lng];
-        console.log(location);
 
-        let test = venueslatlng.indexOf(location)
-        console.log(test);
+
+
+        for (let i = 0; i < venueslatlng.length; i++) {
+
+            if ((location[0] == venueslatlng[i][0]) && (location[1] == venueslatlng[i][1])) {
+                let vicinity = allvenues[i].vicinity
+
+                let adressnumber = vicinity.substr(0,vicinity.indexOf(' '));
+                console.log(adressnumber);
+                venueInfoNumber.innerHTML = adressnumber;
+            }
+
+        }
+
+
+
       }
 
     })
