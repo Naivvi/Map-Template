@@ -164,6 +164,8 @@ function doMapThings(lat,lng) {
           let foodlocales = [];
           let hotellocales = [];
           let testresults;
+          let foodMarkers = []
+          let hotelMarkers = []
 
             service = new google.maps.places.PlacesService(serviceHolder);
 
@@ -174,7 +176,7 @@ function doMapThings(lat,lng) {
                       // REMEMBER OT PUT  BACK:  let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
                          let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
                          if (results[i].types.includes('restaurant')) {
-                          let marker = L.marker(venuelocation, {icon:foodIcon}).addTo(map);
+                          foodMarkers.push(L.marker(venuelocation, {icon:foodIcon}).addTo(map));
                           foodlocales.push(results[i]);
                           }
                       }
@@ -189,7 +191,7 @@ function doMapThings(lat,lng) {
                 for (let i = 0; i < results.length; i++) {
                      let venuelocation = [results[i].geometry.location.lat(), results[i].geometry.location.lng()];
                      if (results[i].types.includes('restaurant')) {
-                      let marker = L.marker(venuelocation, {icon:motelIcon}).addTo(map);
+                        hotelMarkers.push(L.marker(venuelocation, {icon:motelIcon}).addTo(map));
                       hotellocales.push(results[i]);
                       }
                   }
@@ -200,9 +202,12 @@ function doMapThings(lat,lng) {
     })
 
     Promise.all([foodsearch, hotelsearch]).then(values => {
+
       let allvenues = values[0].concat(values[1])
+      let allmarkers = foodMarkers.concat(hotelMarkers)
       console.log(allvenues);
       let venuephotos = [];
+      let venueslatlng = [];
 
       for (let i = 0; i < allvenues.length; i++) {
 
@@ -211,12 +216,31 @@ function doMapThings(lat,lng) {
         } else {
           venuephotos.push(null)
         }
+
+        venueslatlng[i] = [allvenues[i].geometry.location.lat(), allvenues[i].geometry.location.lng()]
+      }
+
+      console.log(venueslatlng);
+      for (let i = 0; i < allmarkers.length; i++) {
+        allmarkers[i].on('click', showInfo);
       }
 
       let venueInfoBox = document.querySelector('.venueInfo');
       let venueInfoImg = document.querySelector('.venueInfo__img');
 
       venueInfoImg.style.backgroundImage = "url('" + venuephotos[1] + "')"
+
+      function showInfo(){
+        console.log(venueslatlng);
+        console.log(this);
+        let lat = this._latlng.lat;
+        let lng = this._latlng.lng;
+        let location = [lat, lng];
+        console.log(location);
+
+        let test = venueslatlng.indexOf(location)
+        console.log(test);
+      }
 
     })
 
