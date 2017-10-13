@@ -63,8 +63,8 @@ var savedIcon = L.divIcon({
   };
   firebase.initializeApp(config);
 
-  var storage = firebase.storage();
-  var storageRef = storage.ref();
+
+
 
   var firebaseRef = firebase.database().ref();
 
@@ -107,6 +107,30 @@ var savedIcon = L.divIcon({
     var newPost = snapshot.val();
 
   });
+
+
+
+  var uploadBtn = document.querySelector('#upload-btn');
+
+  uploadBtn.addEventListener('click',function(e){
+
+    // var storageRef = firebase.storage.ref();
+    //
+    // var imagesRef = storageRef.child('images/' + file.name);
+
+      var file = e.target.files[0];
+
+      var uploading = imagesRef.put(file);
+
+      uploading.on('state_changed',function(snapshot){
+        console.log('uploading...')
+      });
+
+
+
+
+  });
+
 
 
 
