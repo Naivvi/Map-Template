@@ -203,7 +203,7 @@ function doMapThings(lat,lng) {
     })
 
     Promise.all([foodsearch, hotelsearch]).then(values => {
-
+       console.log(values[0]);
       let allvenues = values[0].concat(values[1])
       let allmarkers = foodMarkers.concat(hotelMarkers)
 
@@ -229,11 +229,13 @@ function doMapThings(lat,lng) {
 
       let venueInfoBox = document.querySelector('.venueInfo');
       let venueInfoNumber = document.querySelector('.venueInfo__number');
-      // let venueInfoImg = document.querySelector('.venueInfo__img');
+      let venueInfoaddress = document.querySelector('.venueInfo__address');
+      let venueInfoname = document.querySelector('.venueInfo__name');
 
-      // venueInfoImg.style.backgroundImage = "url('" + venuephotos[1] + "')"
       console.log(venuephotos)
       function showInfo(){
+
+
 
         let lat = this._latlng.lat;
         let lng = this._latlng.lng;
@@ -245,12 +247,21 @@ function doMapThings(lat,lng) {
 
             if ((location[0] == venueslatlng[i][0]) && (location[1] == venueslatlng[i][1])) {
                 let vicinity = allvenues[i].vicinity
+                var bits = vicinity.split(",");
+                let address = bits[0];
 
-                let adressnumber = vicinity.substr(0,vicinity.indexOf(' '));
-                console.log(adressnumber);
+                let adressnumber = address.substr(0,address.indexOf(' '));
+
                 venueInfoNumber.innerHTML = adressnumber;
+                let adressname = address.substr(address.indexOf(' '));
+                venueInfoaddress.innerHTML = adressname;
+
+                let venuename = allvenues[i].name;
+                venueInfoname.innerHTML = venuename;
+                console.log(venuename);
             }
 
+          venueInfoBox.classList.remove('hide');
         }
 
 

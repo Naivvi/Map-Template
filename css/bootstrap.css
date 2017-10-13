@@ -6191,7 +6191,8 @@ body {
 .hide {
   visibility: hidden;
   overflow: hidden;
-  height: 0; }
+  height: 0;
+  transition: height 1s ease; }
 
 .translatex {
   left: -100%;
@@ -6207,17 +6208,35 @@ body {
 
 .venueInfo {
   width: 100%;
-  height: 10em;
+  height: 5em;
   position: absolute;
   top: 3em;
   z-index: 997;
   display: flex;
   border-radius: 0.5em;
   background-color: #fff; }
-  .venueInfo__img {
-    flex: 0 0 50%;
-    height: 100%;
-    background-size: cover;
-    background-repeat: no-repeat; }
   .venueInfo__header {
-    flex: 1 0 30%; }
+    display: flex;
+    width: 100%; }
+  .venueInfo__number {
+    font-size: 2em;
+    padding-left: 0.5em;
+    padding-top: 0.75em;
+    position: relative;
+    width: 100%;
+    flex: 0 0 5%; }
+    .venueInfo__number:after {
+      content: "";
+      border-left: 3px solid #000;
+      height: 1.5em;
+      position: absolute;
+      top: 0.60em;
+      right: -0.4em; }
+  .venueInfo__info {
+    padding-left: 5%; }
+  .venueInfo__address {
+    font-size: 1.25em; }
+  .venueInfo__name {
+    font-size: 0.75em;
+    padding-top: 1.55em;
+    top: 1em; }
