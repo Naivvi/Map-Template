@@ -6134,8 +6134,7 @@ body {
 .mapIcon {
   height: 20em;
   width: 20em;
-  border-radius: 20em;
-  position: relative; }
+  border-radius: 20em; }
   .mapIcon__stalk {
     position: absolute;
     width: 0.65em;

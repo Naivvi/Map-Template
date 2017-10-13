@@ -7,6 +7,8 @@ let googlebtn = document.querySelector('.google');
 
 var popup = L.popup();
 
+var spots = [''];
+
 var map = L.map("map", {
     zoomControl: false,
     minZoom: 16,
@@ -43,10 +45,11 @@ var savedIcon = L.divIcon({
 });
 
 
+
+
 (function(){
 
   var username = 'tamari';
-
 
 
   // Initialize Firebase
@@ -60,6 +63,9 @@ var savedIcon = L.divIcon({
   };
   firebase.initializeApp(config);
 
+  var storage = firebase.storage();
+  var storageRef = storage.ref();
+
   var firebaseRef = firebase.database().ref();
 
   var geoFire = new GeoFire(firebaseRef);
@@ -68,20 +74,43 @@ var savedIcon = L.divIcon({
 
   var usersRef = firebaseRef.child("users");
 
-  usersRef.set({
-    tamari:{
-      is_cool:"yes"
-    }
+  spotsRef.on("value", function(snapshot) {
+    var spots = spotsToArray(snapshot);
+    console.log(spots);
+
+      function showSpots() {
+
+        for (var i = 1; i < spots.length; i++) {
+
+           var lat = spots[i].location["0"];
+           var lng = spots[i].location["1"];
+
+            L.marker(([lat,lng]),{icon:scenicIcon}).addTo(map).on('click',showContent);
+
+        }
+
+      };
+
+      function showContent(){
+
+      };
+
+
+      $('.footer__icon--scenic').click(showSpots);
+
+
+
+
   });
 
-  spotsRef.set({
-    tamari:{
-      is_here:"yes"
-    }
+  spotsRef.on("child_added", function(snapshot, prevChildKey) {
+    var newPost = snapshot.val();
+
   });
 
-  console.log(usersRef);
-  console.log(spotsRef);
+
+
+
 
   var provider = new firebase.auth.GoogleAuthProvider();
 
@@ -94,18 +123,18 @@ var savedIcon = L.divIcon({
 
       var user = firebase.auth().currentUser;
 
-      // var ref = new Firebase("https://scenic-spots.firebaseio.com");
-      //
-      // firebaseRef.onAuth(function(authData) {
-      //   if (authData) {
-      //     // save the user's profile into the database so we can list users,
-      //     // use them in Security and Firebase Rules, and show profiles
-      //     firebaseRef.child("users").child(authData.uid).set({
-      //       provider: authData.provider,
-      //       name: getName(authData)
-      //     });
-      //   }
-      // });
+      var ref = new Firebase("https://scenic-spots.firebaseio.com");
+
+      firebaseRef.onAuth(function(authData) {
+        if (authData) {
+          // save the user's profile into the database so we can list users,
+          // use them in Security and Firebase Rules, and show profiles
+          firebaseRef.child("users").child(authData.uid).set({
+            provider: authData.provider,
+            name: getName(authData)
+          });
+        }
+      });
 
       changePage();
 
@@ -117,6 +146,11 @@ var savedIcon = L.divIcon({
   }
 
   googlebtn.addEventListener('click', changePage);
+
+
+
+
+
 
   displayMap();
 
@@ -176,7 +210,7 @@ var savedIcon = L.divIcon({
   map.on('click', onMapClick);
 
   function onLocationFound(e) {
-    var radius = e.accuracy * 5;
+    var radius = e.accuracy * 2;
 
     L.marker((e.latlng),{icon:savedIcon}).addTo(map)
         .bindPopup( username + "'s position").openPopup();
@@ -195,11 +229,15 @@ var savedIcon = L.divIcon({
                   corner2 = L.latLng(-36.912724, 174.816856),
                   bounds = L.latLngBounds(corner1, corner2);
 
-                // map.setMaxBounds(bounds);
+                map.setMaxBounds(bounds);
+
+                console.log("foursquare");
+
+
 
                   var lat = -36.848461
                   var lon = 174.763336
-    							var fetchVenues = fetch('https://api.foursquare.com/v2/venues/search' + apiKey+'&ll='+ lat + ',' + lon + '&limit=50')
+    							var fetchVenues = fetch('https://api.foursquare.com/v2/venues/search' + apiKey +'&ll='+ lat + ',' + lon + '&limit=50')
     									.then(function(response){
     									return response.json();
     								});
@@ -225,16 +263,11 @@ var savedIcon = L.divIcon({
     // console.log('d');
       popup
           .setLatLng(e.latlng)
-          .setContent("add scenic spot? ")
-          .openOn(map)
-          .addEventListener('click',function(){
-           alert('added scenic spot');
-          });
-
-      var newMarker = new L.marker((e.latlng),{icon:savedIcon}).addTo(map);
-
-
-
+          .setContent("Add scenic spot?")
+          .openOn(map);
+          // .addEventListener('click',function(){
+          //  alert('added scenic spot');
+          // });
 
       let pos = [e.latlng.lat, e.latlng.lng];
 
@@ -243,31 +276,54 @@ var savedIcon = L.divIcon({
       // L.marker((e.latlng),{icon:savedIcon}).addTo(map)
       //     .bindPopup( username + "'s position").openPopup();
 
-          $('#myModal').modal();
+
 
 
           $('#save-spot').click(function(){
 
             var spotName = $('#spot-name').val();
+            var spotDescription = $('#spot-description').val();
             console.log(spotName);
-              spotsRef.set({
-                uuid:{
+              spotsRef.push().set({
                   spotname: spotName,
                   location: pos,
-                }
-
+                  description: spotDescription,
               })
           });
 
       console.log(pos);
       console.log(e.latlng);
       $('.leaflet-popup').on('click',function(){
-        firebaseRef.set(pos).then(function() {
-          console.log( "yoza");
-      });
+        map.closePopup();
+        $('#myModal').modal();
+
     });
 
   }
+
+  function spotsToArray(snapshot){
+
+    console.log("spots to array")
+
+
+      var spots = [''];
+
+      snapshot.forEach(function(childSnapshot) {
+        var item = childSnapshot.val();
+        item.key = childSnapshot.key;
+
+        spots.push(item);
+        console.log("spots  inside" + item);
+      });
+
+      console.log(spots[0]);
+
+    return spots;
+
+
+  };
+
+
 
 
 
