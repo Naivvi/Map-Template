@@ -44,13 +44,11 @@ var savedIcon = L.divIcon({
   html: '<div class="mapIcon__stalk mapIcon__stalk--saved"></div><div class="mapIcon__image mapIcon__image--saved"></div>'
 });
 
-
-
+var poo = false;
 
 (function(){
 
   var username = 'tamari';
-
 
   // Initialize Firebase
   var config = {
@@ -62,9 +60,6 @@ var savedIcon = L.divIcon({
     messagingSenderId: "148448140954"
   };
   firebase.initializeApp(config);
-
-
-
 
   var firebaseRef = firebase.database().ref();
 
@@ -79,36 +74,34 @@ var savedIcon = L.divIcon({
     console.log(spots);
 
       function showSpots() {
+          for (var i = 1; i < spots.length; i++) {
 
-        for (var i = 1; i < spots.length; i++) {
+             var lat = spots[i].location["0"];
+             var lng = spots[i].location["1"];
 
-           var lat = spots[i].location["0"];
-           var lng = spots[i].location["1"];
+            var marker = L.marker(([lat,lng]),{icon:scenicIcon}).addTo(map).on('click',showContent);
+              var markers = L.layerGroup([marker]);
 
-            L.marker(([lat,lng]),{icon:scenicIcon}).addTo(map).on('click',showContent);
-
-        }
-
-      };
+          }
+          $('.footer__icon--scenic').click(function(){
+            poo == true;
+          })
+      }
 
       function showContent(){
 
-      };
+      }
 
 
       $('.footer__icon--scenic').click(showSpots);
 
-
-
-
-  });
+  })
 
   spotsRef.on("child_added", function(snapshot, prevChildKey) {
     var newPost = snapshot.val();
+    console.log("new spot " + snapshot);
 
   });
-
-
 
   var uploadBtn = document.querySelector('#upload-btn');
 
@@ -126,15 +119,7 @@ var savedIcon = L.divIcon({
         console.log('uploading...')
       });
 
-
-
-
   });
-
-
-
-
-
 
   var provider = new firebase.auth.GoogleAuthProvider();
 
@@ -147,13 +132,15 @@ var savedIcon = L.divIcon({
 
       var user = firebase.auth().currentUser;
 
-      var ref = new Firebase("https://scenic-spots.firebaseio.com");
+      console.log(user);
+
+
 
       firebaseRef.onAuth(function(authData) {
-        if (authData) {
+        if (authData && isNewUser) {
           // save the user's profile into the database so we can list users,
           // use them in Security and Firebase Rules, and show profiles
-          firebaseRef.child("users").child(authData.uid).set({
+          usersRef.child(authData.uid).set({
             provider: authData.provider,
             name: getName(authData)
           });
@@ -162,19 +149,15 @@ var savedIcon = L.divIcon({
 
       changePage();
 
-      }).catch(function(error) {
-        console.log('error' + error);
-      });
+      })
+      //.catch(function(error) {
+      //   console.log('error' + error);
+      // });
 
 
   }
 
   googlebtn.addEventListener('click', changePage);
-
-
-
-
-
 
   displayMap();
 
@@ -185,22 +168,6 @@ var savedIcon = L.divIcon({
     const clientSecret = '&client_secret=T0S3T3XZ5JKIJYI31QDPLPF5JVEWCGHWVNRLA1GUFN5ZVK0D'
     const apiKey = version +clientid+ clientSecret;
     var doneCities = [];
-
-
-
-
-
-    //change to google display pic
-
-    // var savedIcon = L.divIcon({
-    //   className: 'mapIcon mapIcon--saved',
-    //   iconSize: [50, 50],
-    //   iconAnchor: [25, 90],
-    //   html: '<div class="mapIcon__stalk mapIcon__stalk--saved"></div><div class="mapIcon__image mapIcon__image--saved"></div>'
-    // });
-
-
-
 
 
     var getLocation = function() {
@@ -214,20 +181,10 @@ var savedIcon = L.divIcon({
     };
 
     var geolocationCallback = function(location) {
-    var latitude = location.coords.latitude;
-    var longitude = location.coords.longitude;
-    console.log("you are here i think: [" + latitude + ", " + longitude + "]");
-
-
-    // usersRef.set(username, [latitude, longitude]).then(function() {
-    //   console.log( username + " found");
-    //
-    //
-    //   usersRef.child(username).onDisconnect().remove();
-
-
-    // });
-  };
+      var latitude = location.coords.latitude;
+      var longitude = location.coords.longitude;
+      console.log("you are here i think: [" + latitude + ", " + longitude + "]");
+    };
 
   map.on('locationfound', onLocationFound);
 
@@ -247,7 +204,6 @@ var savedIcon = L.divIcon({
   // Get the current user's location
   getLocation();
 
-
   function doMapThings(city) {
               var corner1 = L.latLng(-36.815135, 174.716778),
                   corner2 = L.latLng(-36.912724, 174.816856),
@@ -255,80 +211,110 @@ var savedIcon = L.divIcon({
 
                 map.setMaxBounds(bounds);
 
-                console.log("foursquare");
+                  var lat = -36.848461;
+                  var lon = 174.763336;
+
+                  var center = [lat,lon];
+
+    							L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibmFpdnZpIiwiYSI6ImNqNmxncmoyMjFyZGMyeG1xN3Yyejk4dHIifQ.O7Bby6q1Jbn8v9ANa4_P5w', {foo: 'bar'}).addTo(map);
+    							L.circle(center, {radius: 2500, fill: false, color: '#000'}).addTo(map);
+
+                  var service = new google.maps.places.PlacesService(map);
+
+                  var hotelRequest = {
+                    location: center,
+                    radius: '500',
+                    type: ['hotel']
+                  }
+
+                  var foodRequest = {
+                    location: center,
+                    radius: '500',
+                    type: ['restaurant']
+
+                  }
+
+                  $('.footer__icon--motel').click(function(){
+                    service.nearbySearch(hotelRequest, hotelcallback);
+                  })
+
+                  $('.footer__icon--food').click(function(){
+                      service.nearbySearch(foodRequest, foodcallback);
+                    })
+
+                  function hotelcallback(results, status) {
+                       if (status == google.maps.places.PlacesServiceStatus.OK) {
+                         for (var i = 0; i < results.length; i++) {
+                           var place = results[i];
+                           createMarker(results[i]);
+                         }
+                       }
+                     }
+
+                     function foodcallback(results, status) {
+                          if (status == google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                              var place = results[i];
+                              createMarker(results[i]);
+                            }
+                          }
+                        }
+
+                     function foodcallback(results, status) {
+                          if (status == google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                              var place = results[i];
+                              createMarker(results[i]);
+                            }
+                          }
+                        }
 
 
+                  function foodMarkers(place) {
+                      var placeLoc = place.geometry.location;
+                      var marker = L.marker((e.latlng),{icon:savedIcon}).addTo(map);
+                      }
 
-                  var lat = -36.848461
-                  var lon = 174.763336
-    							var fetchVenues = fetch('https://api.foursquare.com/v2/venues/search' + apiKey +'&ll='+ lat + ',' + lon + '&limit=50')
-    									.then(function(response){
-    									return response.json();
-    								});
-
-    								fetchVenues.then(function(response){
-
-    										var venues = response.response.venues;
-    										var center = [lat, lon];
-
-    										map.setView(center, 14);
-
-    										L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibmFpdnZpIiwiYSI6ImNqNmxncmoyMjFyZGMyeG1xN3Yyejk4dHIifQ.O7Bby6q1Jbn8v9ANa4_P5w', {foo: 'bar'}).addTo(map);
-    										L.circle(center, {radius: 2500, fill: false, color: '#000'}).addTo(map);
-
-    								});
-    					}
     }
 
-
-
-
   function onMapClick(e) {
-    // console.log('d');
+
       popup
           .setLatLng(e.latlng)
           .setContent("Add scenic spot?")
           .openOn(map);
-          // .addEventListener('click',function(){
-          //  alert('added scenic spot');
-          // });
 
       let pos = [e.latlng.lat, e.latlng.lng];
 
-      // console.log(savedIcon);
-      //
-      // L.marker((e.latlng),{icon:savedIcon}).addTo(map)
-      //     .bindPopup( username + "'s position").openPopup();
+
+      $('#save-spot').click(function(){
+
+        // $('#modal').modal('hide');
+
+        var spotName = $('#spot-name').val();
+        var spotDescription = $('#spot-description').val();
+
+        // create if statement so can only submit once
+
+        spotsRef.push().set({
+              spotname: spotName,
+              location: pos,
+              description: spotDescription,
+            });
 
 
+        });
 
 
-          $('#save-spot').click(function(){
-
-            var spotName = $('#spot-name').val();
-            var spotDescription = $('#spot-description').val();
-            console.log(spotName);
-              spotsRef.push().set({
-                  spotname: spotName,
-                  location: pos,
-                  description: spotDescription,
-              })
-          });
-
-      console.log(pos);
-      console.log(e.latlng);
       $('.leaflet-popup').on('click',function(){
         map.closePopup();
         $('#myModal').modal();
 
-    });
+      });
 
   }
 
   function spotsToArray(snapshot){
-
-    console.log("spots to array")
-
 
       var spots = [''];
 
@@ -337,28 +323,14 @@ var savedIcon = L.divIcon({
         item.key = childSnapshot.key;
 
         spots.push(item);
-        console.log("spots  inside" + item);
+
       });
-
-      console.log(spots[0]);
-
-    return spots;
+      return spots;
 
 
-  };
-
-
-
-
-
-
+  }
 
 })();
-
-
-
-
-
 
 var searchIcon = document.querySelector('.header__searchIcon');
 var searchBar = document.querySelector('.header__searchBar');
