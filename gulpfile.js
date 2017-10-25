@@ -4,6 +4,7 @@ var gulp = require('gulp');
 var browserSync = require('browser-sync').create();
 var reload = browserSync.reload;
 var sass = require('gulp-sass');
+var jslint = require('gulp-jslint');
 // var autoprefixer = require('gulp-autoprefixer');
 
 gulp.task('sass', function () {
@@ -18,10 +19,14 @@ gulp.task('js', function () {
     return gulp.src('js/*js')
         .pipe(browserify())
         // .pipe(uglify())
-        .pipe(gulp.dest('js/script.js'));
+        .pipe(gulp.dest('js/script.js'))
+        .pipe(jslint({ /* this object represents the JSLint directives being passed down */ }))
+        .pipe(jslint.reporter( 'my-reporter' ));
 });
 
 gulp.task('js-watch', ['js'], function (done) {
+
+
     reload;
     done();
 });
@@ -42,6 +47,10 @@ gulp.task('serve', function(){
 
 
 });
+
+gulp.task('lint',function(){
+  return gulp.src(['source.js'])
+
 
 gulp.task('default',['sass','serve']);
 
